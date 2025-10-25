@@ -27,15 +27,16 @@ struct PokemonImageThumbnail: Identifiable {
         // 画像のリサイズ
         return await resizeImage(
             for: image,
-            with: image.size,
             maxThumbnailSize: Self.maxThumbnailSize,
             displayScale: displayScale
         )
     }
     
     @concurrent
-    private func resizeImage(for image: UIImage, with originalSize: CGSize, maxThumbnailSize: CGFloat, displayScale: CGFloat) async -> UIImage? {
+    private func resizeImage(for image: UIImage, maxThumbnailSize: CGFloat, displayScale: CGFloat) async -> UIImage? {
         // サムネイルサイズを計算して生成
+        let originalSize = image.size
+        print(originalSize)
         let maxDimension = max(originalSize.width, originalSize.height)
         let shrinkFactor = maxThumbnailSize / maxDimension
         let newSize = CGSize(
@@ -43,6 +44,33 @@ struct PokemonImageThumbnail: Identifiable {
             height: originalSize.height * shrinkFactor * displayScale
         )
         return image.preparingThumbnail(of: newSize)
+    }
+    
+    func applyHeavyFilters(for originalImage: UIImage, displayScale: CGFloat) -> UIImage? {
+        guard let ciImage = CIImage(image: originalImage) else { return nil }
+
+        // 1. モノクロフィルタを適用
+        let monoFilter = CIFilter(name: "CIPhotoEffectNoir")
+        monoFilter?.setValue(ciImage, forKey: kCIInputImageKey)
+        
+        guard let monoOutput = monoFilter?.outputImage else { return nil }
+
+        // 2. さらにガウスぼかし（ブラー）フィルタを適用
+        // radiusを大きくすると、処理がより重くなります
+        let blurFilter = CIFilter(name: "CIGaussianBlur")
+        blurFilter?.setValue(monoOutput, forKey: kCIInputImageKey)
+        blurFilter?.setValue(10.0, forKey: kCIInputRadiusKey) // ぼかしの強度
+
+        guard let finalOutput = blurFilter?.outputImage else { return nil }
+
+        // 3. CIImageをUIImageに戻すためにCGImageを生成
+        let context = CIContext()
+        guard let cgImage = context.createCGImage(finalOutput, from: finalOutput.extent) else {
+            return nil
+        }
+        
+        // 4. 新しいUIImageを生成
+        return UIImage(cgImage: cgImage)
     }
 }
 
