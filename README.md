@@ -10,7 +10,7 @@ PokéAPIからポケモンのデータを取得して一覧表示するiOSアプ
 
 ## 技術スタック
 
-- **Swift 5.0**
+- **Swift ６.2**
 - **SwiftUI**
 - **iOS 26.0+**
 - **Swift Concurrency** (async/await)
