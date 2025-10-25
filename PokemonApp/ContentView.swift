@@ -9,7 +9,17 @@ import SwiftUI
 
 struct ContentView: View {
     var body: some View {
-        PokemonListView()
+        TabView {
+            PokemonListView()
+                .tabItem {
+                    Label("List", systemImage: "list.bullet")
+                }
+
+            PokemonCollectionView()
+                .tabItem {
+                    Label("Collection", systemImage: "square.grid.2x2")
+                }
+        }
     }
 }
 
