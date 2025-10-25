@@ -8,19 +8,39 @@
 import SwiftUI
 
 struct PokemonDetailView: View {
-    let pokemon: PokemonSummary
+    let pokemonId: Int
+    @State private var viewModel = PokemonDetailViewModel()
 
     private var spriteURLs: [URL] {
+        guard let pokemon = viewModel.pokemon else { return [] }
         var urls: [URL] = []
         if let front = pokemon.sprites.frontDefault { urls.append(front) }
         if let back = pokemon.sprites.backDefault { urls.append(back) }
         if let frontShiny = pokemon.sprites.frontShiny { urls.append(frontShiny) }
         if let backShiny = pokemon.sprites.backShiny { urls.append(backShiny) }
         urls.append(contentsOf: pokemon.sprites.otherImages)
-        return Array(Set(urls)) // unique urls only
+        return urls // unique urls only
     }
 
     var body: some View {
+        Group {
+            if viewModel.isLoading {
+                ProgressView("Loading...")
+            } else if let pokemon = viewModel.pokemon {
+                detailContent(for: pokemon)
+            } else {
+                Text("Failed to load Pokemon")
+            }
+        }
+        .onAppear {
+            Task {
+                await viewModel.loadPokemonDetail(id: pokemonId)
+            }
+        }
+    }
+
+    @ViewBuilder
+    private func detailContent(for pokemon: PokemonSummary) -> some View {
         ScrollView {
             VStack(spacing: 20) {
                 TabView {
