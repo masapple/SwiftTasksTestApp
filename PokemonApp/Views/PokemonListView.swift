@@ -12,13 +12,30 @@ struct PokemonListView: View {
 
     var body: some View {
         NavigationView {
-            List(viewModel.pokemonList) { pokemon in
-                if let pokemonId = pokemon.pokemonId {
-                    NavigationLink(destination: PokemonDetailView(pokemonId: pokemonId)) {
+            List {
+                ForEach(viewModel.pokemonList) { pokemon in
+                    if let pokemonId = pokemon.pokemonId {
+                        NavigationLink(destination: PokemonDetailView(pokemonId: pokemonId)) {
+                            Text(pokemon.name.capitalized)
+                        }
+                        .onAppear {
+                            if pokemon.id == viewModel.pokemonList.last?.id {
+                                Task {
+                                    await viewModel.loadMorePokemon()
+                                }
+                            }
+                        }
+                    } else {
                         Text(pokemon.name.capitalized)
                     }
-                } else {
-                    Text(pokemon.name.capitalized)
+                }
+
+                if viewModel.isLoadingMore {
+                    HStack {
+                        Spacer()
+                        ProgressView()
+                        Spacer()
+                    }
                 }
             }
             .navigationTitle("Pokémon List")
