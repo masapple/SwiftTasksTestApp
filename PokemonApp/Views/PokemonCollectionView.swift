@@ -11,7 +11,7 @@ struct PokemonCollectionView: View {
     @State private var viewModel = PokemonCollectionViewModel()
 
     let columns: [GridItem] = [
-        GridItem(.adaptive(minimum: 100))
+        GridItem(.adaptive(minimum: PokemonImageThumbnail.maxThumbnailSize))
     ]
 
     var body: some View {
@@ -21,29 +21,10 @@ struct PokemonCollectionView: View {
                     ForEach(viewModel.pokemonList) { pokemon in
                         NavigationLink(destination: PokemonDetailView(pokemonId: pokemon.id)) {
                             VStack {
-                                AsyncImage(url: pokemon.sprites.frontDefault) { phase in
-                                    switch phase {
-                                    case .empty:
-                                        ProgressView()
-                                            .frame(width: 100, height: 100)
-                                    case .success(let image):
-                                        image
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 100, height: 100)
-                                    case .failure:
-                                        Image(systemName: "questionmark.square.dashed")
-                                            .resizable()
-                                            .scaledToFit()
-                                            .frame(width: 100, height: 100)
-                                            .foregroundColor(.gray)
-                                    @unknown default:
-                                        EmptyView()
-                                    }
-                                }
-                                Text(pokemon.name.capitalized)
-                                    .font(.caption)
-                                    .lineLimit(1)
+                                PokemonThumbnailView(imageURL: pokemon.sprites.preferredImage)
+//                                Text(pokemon.name.capitalized)
+//                                    .font(.caption)
+//                                    .lineLimit(1)
                             }
                         }
                         .onAppear {

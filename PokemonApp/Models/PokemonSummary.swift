@@ -31,6 +31,11 @@ struct PokemonSummary: Identifiable {
         let backShiny: URL?
         let otherImages: [URL] // To support more images if needed
 
+        /// otherImagesがあればその最初の要素を返し、なければfrontDefaultを返す
+        var preferredImage: URL? {
+            otherImages.first ?? frontDefault
+        }
+
         init(frontDefault: URL?, backDefault: URL?, frontShiny: URL?, backShiny: URL?, otherImages: [URL]) {
             self.frontDefault = frontDefault
             self.backDefault = backDefault
